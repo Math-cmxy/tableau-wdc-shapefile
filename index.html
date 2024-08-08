@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Shapefile WDC</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/papaparse/5.3.0/papaparse.min.js"></script>
+    <script src="https://connectors.tableau.com/libs/tableauwdc-2.3.latest.js"></script>
+</head>
+<body>
+    <h1>Shapefile Web Data Connector</h1>
+    <script type="text/javascript">
+        (function() {
+            var myConnector = tableau.makeConnector();
+
+            myConnector.getSchema = function(schemaCallback) {
+                var cols = [{
+                    id: "id",
+                    alias: "ID",
+                    dataType: tableau.dataTypeEnum.string
+                }, {
+                    id: "geometry",
+                    alias: "Geometry",
+                    dataType: tableau.dataTypeEnum.geometry
+                }, {
+                    id: "properties",
+                    alias: "Properties",
+                    dataType: tableau.dataTypeEnum.string
+                }];
+
+                var tableSchema = {
+                    id: "shapefileData",
+                    alias: "Shapefile Data",
+                    columns: cols
+                };
+
+                schemaCallback([tableSchema]);
+            };
+
+            myConnector.getData = function(table, doneCallback) {
+                var shapefileURL = "https://www.data.gouv.fr/fr/datasets/r/0e117c06-248f-45e5-8945-0e79d9136165";
+                
+                // Use a library or custom code to fetch and parse the Shapefile data
+                fetch(shapefileURL)
+                    .then(response => response.arrayBuffer())
+                    .then(data => {
+                        // Process the shapefile data
+                        // For simplicity, this example just creates dummy data
+                        // You should replace this with actual Shapefile processing logic
+                        var tableData = [{
+                            id: "1",
+                            geometry: "POINT(1 1)",
+                            properties: "dummy properties"
+                        }];
+
+                        table.appendRows(tableData);
+                        doneCallback();
+                    })
+                    .catch(error => console.error('Error fetching Shapefile:', error));
+            };
+
+            tableau.registerConnector(myConnector);
+
+            // Create event listener for when the user submits the form
+            document.querySelector("form").addEventListener("submit", function(e) {
+                e.preventDefault();
+                tableau.connectionName = "Shapefile Data"; // This will be the data source name in Tableau
+                tableau.submit(); // This sends the connector object to Tableau
+            });
+        })();
+    </script>
+
+    <form>
+        <input type="submit" value="Get Data">
+    </form>
+</body>
+</html>
